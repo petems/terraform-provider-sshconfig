@@ -17,7 +17,7 @@ var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServe
 
 func TestProvider(t *testing.T) {
 	provider := New("test")()
-	
+
 	if provider == nil {
 		t.Fatal("Expected provider to be created")
 	}
@@ -25,7 +25,7 @@ func TestProvider(t *testing.T) {
 
 func TestProviderMetadata(t *testing.T) {
 	provider := &SSHConfigProvider{version: "test"}
-	
+
 	// Test that provider has the correct type name
 	if provider.version != "test" {
 		t.Errorf("Expected version to be 'test', got %s", provider.version)

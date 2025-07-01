@@ -8,6 +8,7 @@ A Terraform provider for reading SSH configuration files, built with the modern 
 - **Comprehensive Testing**: Includes both unit tests and acceptance tests
 - **Rich Data Access**: Provides both rendered string output and structured map access to SSH configuration values
 - **Flexible Configuration**: Supports custom SSH config file paths or uses system defaults
+- **Auto-generated Documentation**: Complete documentation generated from schema definitions
 
 ## Requirements
 
@@ -85,12 +86,37 @@ Host *.development
     ProxyJump bastion.example.com
 ```
 
+## Documentation
+
+Complete documentation is available in the `docs/` directory and is automatically generated from the provider schema:
+
+- [Provider Documentation](docs/index.md) - Complete provider overview and usage
+- [sshconfig_host Data Source](docs/data-sources/host.md) - Detailed data source documentation
+
+### Generating Documentation
+
+The documentation is automatically generated using [terraform-plugin-docs](https://github.com/hashicorp/terraform-plugin-docs):
+
+```bash
+# Install the documentation tool
+go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+# Generate documentation
+make docs
+```
+
+The documentation generation:
+- Extracts schema information directly from the provider code
+- Generates markdown files with proper formatting
+- Includes examples and usage patterns
+- Validates that documentation stays in sync with code changes
+
 ## Development
 
 ### Building the Provider
 
 ```bash
-go build -o terraform-provider-sshconfig
+go build -v .
 ```
 
 ### Running Tests
@@ -105,16 +131,37 @@ go test -v ./internal/provider/
 TF_ACC=1 go test -v ./internal/provider/
 ```
 
+### Makefile Targets
+
+A comprehensive Makefile is provided for development workflows:
+
+```bash
+make help          # Show all available targets
+make build         # Build the provider
+make test          # Run unit tests
+make testacc       # Run acceptance tests
+make docs          # Generate documentation
+make fmt           # Format code and examples
+make lint          # Run linter
+make dev           # Development workflow (fmt, lint, test, build)
+make ci            # Full CI workflow (includes docs generation)
+```
+
 ### Local Development
 
 To use a locally built provider:
 
 1. Build the provider:
    ```bash
-   go build -o terraform-provider-sshconfig
+   make build
    ```
 
-2. Create a `.terraformrc` file in your home directory:
+2. Install locally:
+   ```bash
+   make install
+   ```
+
+3. Create a `.terraformrc` file in your home directory:
    ```hcl
    provider_installation {
      dev_overrides {
@@ -135,6 +182,7 @@ This provider has been upgraded from Terraform Plugin SDK v2 to the modern Terra
 - **Enhanced Testing**: Comprehensive unit and acceptance tests using the latest testing patterns
 - **Modern Go Patterns**: Uses idiomatic Go patterns and interfaces instead of declarative structs
 - **Future-Proof**: Built on the recommended framework for new Terraform providers
+- **Auto-generated Documentation**: Schema-driven documentation generation
 
 ### Breaking Changes
 
@@ -176,7 +224,8 @@ If you're upgrading from an older version:
 3. Make your changes
 4. Add tests for new functionality
 5. Run the test suite: `go test -v ./...`
-6. Submit a pull request
+6. Generate documentation: `make docs`
+7. Submit a pull request
 
 ### Code Quality
 
@@ -184,7 +233,22 @@ This project maintains high code quality standards:
 
 - All code must pass `go vet` and `golangci-lint`
 - Test coverage should be maintained or improved
+- Documentation must be generated and up-to-date
 - Follow the [Terraform Plugin Framework best practices](https://developer.hashicorp.com/terraform/plugin/framework)
+
+### Documentation Requirements
+
+- All provider schema changes must include updated documentation
+- Examples should be provided for new features
+- Documentation is automatically generated and validated in CI/CD
+- Templates in `templates/` directory control documentation structure
+
+## Examples
+
+Comprehensive examples are available in the `examples/` directory:
+
+- [Basic Usage](examples/data-sources/sshconfig_host/) - Simple data source usage
+- [Complete Example](examples/complete/) - Comprehensive feature demonstration
 
 ## License
 
@@ -194,4 +258,5 @@ This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE
 
 - Built with [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework)
 - Uses [go-sshconfig](https://github.com/petems/go-sshconfig) for SSH config parsing
+- Documentation generated with [terraform-plugin-docs](https://github.com/hashicorp/terraform-plugin-docs)
 - Follows [HashiCorp's provider development guidelines](https://developer.hashicorp.com/terraform/plugin)
