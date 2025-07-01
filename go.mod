@@ -1,10 +1,10 @@
 module github.com/petems/terraform-provider-sshconfig
 
-go 1.13
+go 1.23
 
 require (
-	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/hashicorp/terraform v0.12.23
+	github.com/hashicorp/terraform-plugin-framework v1.15.0
+	github.com/hashicorp/terraform-plugin-go v0.27.0
+	github.com/hashicorp/terraform-plugin-testing v1.12.0
 	github.com/petems/go-sshconfig v1.0.0
-	github.com/sergi/go-diff v1.0.0 // indirect
 )
