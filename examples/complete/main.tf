@@ -9,7 +9,7 @@ terraform {
 # Example SSH config file for demonstration
 resource "local_file" "ssh_config" {
   filename = "${path.module}/test_ssh_config"
-  content = <<-EOF
+  content  = <<-EOF
     Host example.com
         HostName 192.168.1.100
         User myuser
@@ -92,31 +92,31 @@ output "connection_details" {
       port     = lookup(data.sshconfig_host.example.host_map, "Port", "22")
       key_file = data.sshconfig_host.example.host_map["IdentityFile"]
     }
-    
+
     development = {
-      hostname    = lookup(data.sshconfig_host.dev_server.host_map, "HostName", "app1.development")
-      user        = data.sshconfig_host.dev_server.host_map["User"]
-      proxy_jump  = data.sshconfig_host.dev_server.host_map["ProxyJump"]
-      key_file    = data.sshconfig_host.dev_server.host_map["IdentityFile"]
+      hostname   = lookup(data.sshconfig_host.dev_server.host_map, "HostName", "app1.development")
+      user       = data.sshconfig_host.dev_server.host_map["User"]
+      proxy_jump = data.sshconfig_host.dev_server.host_map["ProxyJump"]
+      key_file   = data.sshconfig_host.dev_server.host_map["IdentityFile"]
     }
-    
+
     bastion = {
       hostname = data.sshconfig_host.bastion.host_map["HostName"]
       user     = data.sshconfig_host.bastion.host_map["User"]
       port     = data.sshconfig_host.bastion.host_map["Port"]
       key_file = data.sshconfig_host.bastion.host_map["IdentityFile"]
     }
-    
+
     production = {
-      user                    = data.sshconfig_host.production.host_map["User"]
-      key_file               = data.sshconfig_host.production.host_map["IdentityFile"]
+      user                     = data.sshconfig_host.production.host_map["User"]
+      key_file                 = data.sshconfig_host.production.host_map["IdentityFile"]
       strict_host_key_checking = data.sshconfig_host.production.host_map["StrictHostKeyChecking"]
     }
-    
+
     github = {
-      hostname        = data.sshconfig_host.github.host_map["HostName"]
-      user           = data.sshconfig_host.github.host_map["User"]
-      key_file       = data.sshconfig_host.github.host_map["IdentityFile"]
+      hostname          = data.sshconfig_host.github.host_map["HostName"]
+      user              = data.sshconfig_host.github.host_map["User"]
+      key_file          = data.sshconfig_host.github.host_map["IdentityFile"]
       add_keys_to_agent = data.sshconfig_host.github.host_map["AddKeysToAgent"]
     }
   }
@@ -125,7 +125,7 @@ output "connection_details" {
 # Demonstrate using SSH config data with other resources
 resource "null_resource" "example_connection" {
   count = 0 # Set to 1 to enable this example
-  
+
   connection {
     type        = "ssh"
     host        = data.sshconfig_host.example.host_map["HostName"]
@@ -152,7 +152,7 @@ locals {
       bastion     = data.sshconfig_host.bastion
       production  = data.sshconfig_host.production
       github      = data.sshconfig_host.github
-    } : host_key => format(
+      } : host_key => format(
       "ssh %s@%s%s%s",
       host_data.host_map["User"],
       lookup(host_data.host_map, "HostName", host_data.host),

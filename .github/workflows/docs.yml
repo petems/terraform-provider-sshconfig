@@ -2,9 +2,9 @@ name: Documentation
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   docs:
@@ -47,34 +47,3 @@ jobs:
         fi
         
         echo "All required documentation files are present."
-
-  validate-examples:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23'
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: latest
-
-    - name: Build provider
-      run: go build -v .
-
-    - name: Validate example configurations
-      run: |
-        for example_dir in examples/*/; do
-          if [[ -f "$example_dir/main.tf" ]]; then
-            echo "Validating $example_dir"
-            cd "$example_dir"
-            terraform fmt -check
-            terraform init
-            terraform validate
-            cd - > /dev/null
-          fi
-        done

@@ -3,13 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	gosshconfig "github.com/petems/go-sshconfig"
+	"github.com/petems/terraform-provider-sshconfig/internal/sshconfig"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -90,18 +88,8 @@ func (d *HostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	host := data.Host.ValueString()
 
-	// Open and parse the SSH config file
-	configFile, err := os.Open(configPath)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Open SSH Config File",
-			fmt.Sprintf("Unable to open SSH config file at %s: %s", configPath, err),
-		)
-		return
-	}
-	defer configFile.Close()
-
-	config, err := gosshconfig.Parse(configFile)
+	// Parse the SSH config file using our internal parser
+	config, err := sshconfig.ParseFile(configPath)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Parse SSH Config File",
@@ -111,8 +99,8 @@ func (d *HostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	// Find the host configuration
-	hostLookup := config.FindByHostname(host)
-	if hostLookup == nil {
+	hostConfig := config.FindHost(host)
+	if hostConfig == nil {
 		resp.Diagnostics.AddError(
 			"Host Not Found",
 			fmt.Sprintf("Could not find host %s in SSH config file %s", host, configPath),
@@ -121,16 +109,13 @@ func (d *HostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	// Get the rendered string representation
-	hostDeclaration := hostLookup.String()
+	hostDeclaration := hostConfig.String()
 
-	// Build the host map
-	hostMap := make(map[string]string)
-	for _, param := range hostLookup.Params {
-		hostMap[param.Keyword] = strings.Join(param.Args, " ")
-	}
+	// Get merged options (this applies SSH precedence rules)
+	mergedOptions := config.GetMergedOptions(host)
 
 	// Convert the map to types.Map
-	hostMapValue, diags := types.MapValueFrom(ctx, types.StringType, hostMap)
+	hostMapValue, diags := types.MapValueFrom(ctx, types.StringType, mergedOptions)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
