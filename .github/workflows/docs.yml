@@ -1,0 +1,49 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Install terraform-plugin-docs
+      run: go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+
+    - name: Generate documentation
+      run: tfplugindocs generate -provider-name sshconfig
+
+    - name: Check for documentation changes
+      run: |
+        if [[ -n $(git status --porcelain docs/) ]]; then
+          echo "Documentation is out of date. Please run 'make docs' and commit the changes."
+          git diff docs/
+          exit 1
+        else
+          echo "Documentation is up to date."
+        fi
+
+    - name: Validate documentation
+      run: |
+        # Check that required documentation files exist
+        if [[ ! -f "docs/index.md" ]]; then
+          echo "Missing provider documentation: docs/index.md"
+          exit 1
+        fi
+        
+        if [[ ! -f "docs/data-sources/host.md" ]]; then
+          echo "Missing data source documentation: docs/data-sources/host.md"
+          exit 1
+        fi
+        
+        echo "All required documentation files are present."

@@ -4,9 +4,9 @@ data "sshconfig_host" "github_ssh_config" {
 }
 
 output "github_config" {
-  value = "${data.sshconfig_host.github_ssh_config.rendered}"
+  value = data.sshconfig_host.github_ssh_config.rendered
 }
 
 output "host_map" {
-  value = "${data.sshconfig_host.github_ssh_config.host_map}"
+  value = data.sshconfig_host.github_ssh_config.host_map
 }
